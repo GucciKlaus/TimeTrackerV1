@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="62-UI_app_icons_100.ai-512-3342155545.png" />
+    <None Remove="65-654236_png-file-svg-pause-button-icon-png-clipart-3285311025.png" />
+    <None Remove="check-box-empty-square-_unchecked-512-3735224646.png" />
+    <None Remove="img\62-UI_app_icons_100.ai-512-3342155545.png" />
+    <None Remove="img\65-654236_png-file-svg-pause-button-icon-png-clipart-3285311025.png" />
+    <None Remove="img\check-box-empty-square-_unchecked-512-3735224646.png" />
+    <None Remove="img\pngtree-printer-vector-icon-png-image_3876231-1810485375.jpg" />
+    <None Remove="pngtree-printer-vector-icon-png-image_3876231-1810485375.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DataLayerLib\DataLayerLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="62-UI_app_icons_100.ai-512-3342155545.png" />
+    <Resource Include="65-654236_png-file-svg-pause-button-icon-png-clipart-3285311025.png" />
+    <Resource Include="check-box-empty-square-_unchecked-512-3735224646.png" />
+    <Resource Include="img\62-UI_app_icons_100.ai-512-3342155545.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="img\65-654236_png-file-svg-pause-button-icon-png-clipart-3285311025.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="img\check-box-empty-square-_unchecked-512-3735224646.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="img\pngtree-printer-vector-icon-png-image_3876231-1810485375.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="pngtree-printer-vector-icon-png-image_3876231-1810485375.jpg" />
+  </ItemGroup>
+
+</Project>
