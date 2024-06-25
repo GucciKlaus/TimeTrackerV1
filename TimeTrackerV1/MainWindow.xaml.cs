@@ -24,6 +24,7 @@ namespace TimeTrackerV1
         private TimeSpan _elapsedTime;
         private bool _running;
         private DataContext DB;
+        private readonly List<string> PrintSelection = new List<string> { "Tag", "Woche", "Monat", "Jahr", "Gesamt" };
         public MainWindow()
         {
             InitializeComponent();
@@ -38,6 +39,8 @@ namespace TimeTrackerV1
                 DB.Database.EnsureDeleted();
                 DB.Database.EnsureCreated();
                 cb1.ItemsSource = DB.Users.Select(x => x.UserName).ToList();
+                cb2.ItemsSource = PrintSelection;
+                cb2.SelectedIndex = 4;
             }
             catch (Exception ex)
             {
@@ -99,7 +102,50 @@ namespace TimeTrackerV1
 
         private void btnPrint_Click(object sender, RoutedEventArgs e)
         {
+            string today = DateTime.Now.ToString("dd.MM.yyyy");
+            if (cb1.SelectedItem != null)
+            {
+                int selection = cb2.SelectedIndex;
+                List<string> targetrows = new List<string>();
+                switch (selection)
+                {
+                    case 0:
+                        targetrows = DB.DataObjects.Where(x => x.Date == today).Select(x => x.ToString()).ToList();
+                        Printobject poDay = new Printobject {Name = cb1.SelectedItem.ToString(), data = targetrows};
+                        CreatePDF(poDay);
+                        break;
+                    case 1:
 
+                        break;
+                    case 2:
+
+                        break;
+                    case 3:
+
+                        break;
+                    case 4:
+
+                        break;
+                    default:
+                        ShowWhatMessage();
+                        break;
+
+                }
+            }
+            else
+            {
+                ShowUserSelectionMessage();
+            }
+        }
+
+        private void CreatePDF(Printobject po)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ShowWhatMessage()
+        {
+            MessageBox.Show("What The Hell?!", "Question", MessageBoxButton.OK, MessageBoxImage.Question);
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -145,11 +191,11 @@ namespace TimeTrackerV1
 
         private void cb1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(cb1.SelectedItem != null)
+            if (cb1.SelectedItem != null)
             {
                 ReloadGrid();
             }
-            
+
         }
         private void ShowUserSelectionMessage()
         {
@@ -184,5 +230,82 @@ namespace TimeTrackerV1
         {
             InputBox.Visibility = Visibility.Collapsed;
         }
+
+        private void tbsearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                string text = tbsearch.Text;
+                ShowSearchResults(text);
+            }
+        }
+
+        private void ShowSearchResults(string text)
+        {
+            List<string> rows = new List<string>();
+
+            foreach (object item in dt1.Items)
+            {
+                DataGridRow row = dt1.ItemContainerGenerator.ContainerFromItem(item) as DataGridRow;
+                if (row != null)
+                {
+                    string rowText = "";
+                    foreach (DataGridColumn column in dt1.Columns)
+                    {
+                        FrameworkElement cellContent = column.GetCellContent(row);
+                        if (cellContent != null)
+                        {
+                            string cellValue = "";
+
+                            if (cellContent is TextBlock textBlock)
+                            {
+                                cellValue = textBlock.Text;
+                            }
+                            else if (cellContent is CheckBox checkBox)
+                            {
+                                cellValue = checkBox.IsChecked.HasValue ? checkBox.IsChecked.Value.ToString() : "";
+                            }
+                            else if (cellContent is ComboBox comboBox)
+                            {
+                                cellValue = comboBox.Text;
+                            }
+                            rowText += cellValue + ";";
+                        }
+                    }
+                    rows.Add(rowText);
+                }
+            }
+
+            //Rows durchlaufen um Übereinstimmungen zu finden
+            SearchRows(rows, text);
+
+        }
+
+        private void SearchRows(List<string> rows, string goaltext)
+        {
+            List<string> targetrows = new List<string>();
+            foreach (string row in rows)
+            {
+                if (row.Contains(goaltext))
+                {
+                    string rownew = row.Replace(";", " ");
+                    targetrows.Add(rownew);
+                }
+            }
+
+            ShowTargetRows(targetrows);
+        }
+
+        private void ShowTargetRows(List<string> targetrows)
+        {
+            string message = "Gefundene Ergebnisse:\n\n";
+            foreach (string row in targetrows)
+            {
+                message += row + "\n";
+            }
+            MessageBox.Show(message, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+
     }
 }
