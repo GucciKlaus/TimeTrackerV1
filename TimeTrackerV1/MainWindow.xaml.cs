@@ -1,16 +1,19 @@
 ﻿using DataLayerLib;
+using iText.Kernel.Pdf;
+using iText.Layout;
 using System.Globalization;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using iText.Layout.Element;
+using iText.Layout.Properties;
 
 namespace TimeTrackerV1
 {
@@ -102,29 +105,105 @@ namespace TimeTrackerV1
 
         private void btnPrint_Click(object sender, RoutedEventArgs e)
         {
-            string today = DateTime.Now.ToString("dd.MM.yyyy");
             if (cb1.SelectedItem != null)
             {
+                DateTime today = DateTime.Today;
                 int selection = cb2.SelectedIndex;
                 List<string> targetrows = new List<string>();
+                TimeSpan totalDuration = TimeSpan.Zero;
                 switch (selection)
                 {
                     case 0:
-                        targetrows = DB.DataObjects.Where(x => x.Date == today).Select(x => x.ToString()).ToList();
-                        Printobject poDay = new Printobject {Name = cb1.SelectedItem.ToString(), data = targetrows};
+                        targetrows = DB.DataObjects
+                                        .Where(x => x.Date.Date == today)
+                                        .Select(x => x.ToString())
+                                        .ToList();
+                        foreach (var obj in DB.DataObjects.Where(x => x.Date.Date == today))
+                        {
+                            totalDuration += TimeSpan.Parse(obj.Timespan);
+                        }
+
+                        Printobject poDay = new Printobject
+                        {
+                            Name = cb1.SelectedItem.ToString(),
+                            data = targetrows,
+                            TimeSum = totalDuration.ToString(@"hh\:mm")
+                        };
                         CreatePDF(poDay);
                         break;
-                    case 1:
 
+                    case 1:
+                        DateTime startOfWeek = DateTime.Now.AddDays(-((int)DateTime.Now.DayOfWeek));
+                        DateTime endOfWeek = startOfWeek.AddDays(7);
+                        targetrows = DB.DataObjects
+                            .Where(x => x.Date >= startOfWeek && x.Date < endOfWeek)
+                            .Select(x => x.ToString())
+                            .ToList();
+                        foreach (var obj in DB.DataObjects.Where(x => x.Date >= startOfWeek && x.Date < endOfWeek))
+                        {
+                            totalDuration += TimeSpan.Parse(obj.Timespan);
+                        }
+                        Printobject poWeek = new Printobject
+                        {
+                            Name = cb1.SelectedItem.ToString(),
+                            data = targetrows,
+                            TimeSum = totalDuration.ToString(@"hh\:mm")
+                        };
+                        CreatePDF(poWeek);
                         break;
                     case 2:
-
+                        DateTime startOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                        DateTime endOfMonth = startOfMonth.AddMonths(1);
+                        targetrows = DB.DataObjects
+                            .Where(x => x.Date >= startOfMonth && x.Date < endOfMonth)
+                            .Select(x => x.ToString())
+                            .ToList();
+                        foreach (var obj in DB.DataObjects.Where(x => x.Date >= startOfMonth && x.Date < endOfMonth))
+                        {
+                            totalDuration += TimeSpan.Parse(obj.Timespan);
+                        }
+                        Printobject poMonth = new Printobject
+                        {
+                            Name = cb1.SelectedItem.ToString(),
+                            data = targetrows,
+                            TimeSum = totalDuration.ToString(@"hh\:mm")
+                        };
+                        CreatePDF(poMonth);
                         break;
                     case 3:
-
+                        DateTime startOfYear = new DateTime(DateTime.Now.Year, 1, 1);
+                        DateTime endOfYear = startOfYear.AddYears(1);
+                        targetrows = DB.DataObjects
+                            .Where(x => x.Date >= startOfYear && x.Date < endOfYear)
+                            .Select(x => x.ToString())
+                            .ToList();
+                        foreach (var obj in DB.DataObjects.Where(x => x.Date >= startOfYear && x.Date < endOfYear))
+                        {
+                            totalDuration += TimeSpan.Parse(obj.Timespan);
+                        }
+                        Printobject poYear = new Printobject
+                        {
+                            Name = cb1.SelectedItem.ToString(),
+                            data = targetrows,
+                            TimeSum = totalDuration.ToString(@"hh\:mm")
+                        };
+                        CreatePDF(poYear);
                         break;
                     case 4:
-
+                        targetrows = DB.DataObjects
+                  .Select(x => x.ToString())
+                  .ToList();
+                        foreach (var obj in DB.DataObjects)
+                        {
+                            totalDuration += TimeSpan.Parse(obj.Timespan);
+                        }
+                        Printobject poTotal = new Printobject
+                        {
+                            Name = cb1.SelectedItem.ToString(),
+                            data = targetrows,
+                            TimeSum = totalDuration.ToString(@"hh\:mm")
+                        };
+                        CreatePDF(poTotal);
                         break;
                     default:
                         ShowWhatMessage();
@@ -140,7 +219,44 @@ namespace TimeTrackerV1
 
         private void CreatePDF(Printobject po)
         {
-            throw new NotImplementedException();
+            string pdfPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            string filename = $"Auswertung_Arbeitsliste_{DateTime.Now:dd_MM_yyyy}.pdf";
+            string wholepath = System.IO.Path.GetFullPath(System.IO.Path.Combine(pdfPath,filename));
+            try
+            {
+                PdfWriter writer = new PdfWriter(wholepath);
+                PdfDocument pdf = new PdfDocument(writer);
+                Document document = new Document(pdf);
+
+            Paragraph title = new Paragraph($"{po.Name} Report")
+            .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+            .SetFontSize(20)
+            .SetBold();
+                document.Add(title);
+
+                document.Add(new Paragraph("\n"));
+
+                foreach (string row in po.data)
+                {
+                    Paragraph data = new Paragraph(row)
+                        .SetFontSize(12)
+                        .SetMarginBottom(10);
+                    document.Add(data);
+                }
+
+                document.Add(new Paragraph("\n"));
+                Paragraph datasum = new Paragraph($"Gesamt-Summe: {po.TimeSum}").SetFontSize(12).SetMarginBottom(10).SetBold();
+                document.Add(datasum);
+
+                document.Close();
+
+
+                MessageBox.Show($"PDF erfolgreich erstellt: {pdfPath}", "Erfolg", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fehler beim Erstellen des PDFs: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ShowWhatMessage()
@@ -154,7 +270,7 @@ namespace TimeTrackerV1
             {
                 string title = tbtitel.Text;
                 string description = tbinfo.Text;
-                string date = DateTime.Now.ToString("dd.MM.yyyy");
+                DateTime date = DateTime.Now;
                 string time = lbltime.Content.ToString();
                 DateTime parsedTime;
                 if (DateTime.TryParseExact(time, "HH:mm:ss:ff", CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedTime))

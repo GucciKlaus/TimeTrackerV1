@@ -10,7 +10,8 @@ namespace TimeTrackerV1
 {
     public class Printobject
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public List<string> data { get; set; } = new List<string>();
+        public string? TimeSum { get; set; }
     }
 }

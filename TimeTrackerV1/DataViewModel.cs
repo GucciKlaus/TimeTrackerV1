@@ -19,7 +19,7 @@ namespace TimeTrackerV1
         {
             var list = new List<DataViewModel>();
             foreach (DataObjectV2 v in sepp) {
-              DataViewModel dummy = new DataViewModel { Date = v.Date, Title = v.Title, Description = v.Description, Timespan = v.Timespan };
+              DataViewModel dummy = new DataViewModel { Date = v.Date.ToString("dd.MM.yyyy"), Title = v.Title, Description = v.Description, Timespan = v.Timespan };
                 list.Add(dummy);
             }
             return list;
